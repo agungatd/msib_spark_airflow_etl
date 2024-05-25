@@ -8,7 +8,7 @@ import os
 # argv
 spark_master = "spark://spark:7077"
 postgres_driver_jar = "/usr/share/java/postgresql-42.6.0.jar"
-data_file = "/opt/data/raw.csv"
+data_file = "/opt/data/raw.csv" #path in spark container
 
 load_dotenv()
 postgres_user = os.getenv('USER')
@@ -26,7 +26,7 @@ dag = DAG(
 
 start = DummyOperator(task_id="start", dag=dag)
 
-task1 = SparkSubmitOperator(
+extract_data = SparkSubmitOperator(
     task_id="extract",
     application="/opt/airflow/dags/extract-spark.py",
     conf={"spark.master": spark_master},
@@ -44,7 +44,7 @@ task1 = SparkSubmitOperator(
     dag=dag
 )
 
-task2 = SparkSubmitOperator(
+transform_data = SparkSubmitOperator(
     task_id="transform",
     application="/opt/airflow/dags/transform-spark.py", 
     conf={"spark.master": spark_master},
@@ -61,7 +61,7 @@ task2 = SparkSubmitOperator(
     dag=dag
 )
 
-task3 = SparkSubmitOperator(
+load_data = SparkSubmitOperator(
     task_id="Load",
     application="/opt/airflow/dags/load-spark.py",
     conf={"spark.master": spark_master},
@@ -81,4 +81,4 @@ task3 = SparkSubmitOperator(
 
 end = DummyOperator(task_id="end", dag=dag)
 
-start >> task1 >> task2 >> task3 >> end
+start >> extract_data >> transform_data >> load_data >> end

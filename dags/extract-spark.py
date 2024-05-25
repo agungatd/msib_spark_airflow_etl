@@ -3,10 +3,11 @@ import sys
 import psycopg2
 
 try:
-    spark: SparkSession = SparkSession.builder\
-        .appName('Etract')\
+    spark = SparkSession.builder\
+        .appName('Extract')\
         .getOrCreate()
 
+    # Extract data from csv
     df = spark.read.csv(sys.argv[6], sep=',', header=True, inferSchema=True)
 
     # set parameters
@@ -28,10 +29,10 @@ try:
     # Create database if it doesn't exist
     sql_stmt = """
     CREATE TABLE IF NOT EXISTS source(
-        first_name VARCHAR(50), 
-        last_name VARCHAR(50), 
-        age VARCHAR(50), 
-        sex VARCHAR(50)
+        first_name VARCHAR(50),
+        last_name VARCHAR(50),
+        age VARCHAR(50),
+        gender VARCHAR(50)
     );
     """
     cursor = conn.cursor()
@@ -49,5 +50,5 @@ try:
         .mode("overwrite") \
         .save()
 
-except Exception as err:
-    print(err)
+except Exception as e:
+    print(e)
